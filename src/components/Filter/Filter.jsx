@@ -6,6 +6,7 @@ export const Filter = ({ filter, changeInput}) => (
         <input
         type="text"
         name={filter}
+        value={filter}
         onChange={changeInput}
         className={css.contact__input}
         placeholder="Find contacts by name"

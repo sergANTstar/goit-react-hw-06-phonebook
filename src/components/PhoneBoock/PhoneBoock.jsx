@@ -1,78 +1,61 @@
 import { nanoid } from 'nanoid';
-import React, { Component } from 'react';
+import { useState } from 'react';
+import useLocalStorage from "use-local-storage";
 import { Contacts } from 'components/Contacts/Contacts'; 
 import { Filter } from 'components/Filter/Filter'; 
 import { ContactForm } from 'components/ContactForm/ContactForm'; 
 import css from '../PhoneBoock/PhoneBoock.module.css'
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-export class PhoneBoock extends Component {
-    state = {
-        contacts: [],
-        filter: '',
+export function  PhoneBoock () {
+
+  const [contacts, setContacts] = useLocalStorage('contacts', []);
+  const [filter, setFilter] = useState('');
+
+    
+      const formSubmit = (name, number) => {
+        contacts.some(contact => contact.name === name || contact.number === number)
+          ? Notify.warning(`${name} is already in contacts`)
+          : setContacts([
+              ...contacts,
+              {
+                id: nanoid(),
+                name: name,
+                number: number,
+              },
+            ]);
       };
     
-      formSubmit = ({ name, number }) => {
-        const contact = {
-          id: nanoid(),
-          name,
-          number,
-        };
-        this.state.contacts.some(
-          i =>
-            (i.name.toLowerCase() === contact.name.toLowerCase() &&
-              i.number === contact.number) ||
-            i.number === contact.number
-        )
-          ? alert(`${name} is already in contacts`)
-          : this.setState(({ contacts }) => ({
-              contacts: [contact, ...contacts],
-            }));
+      const findContacts = [];
+      contacts.forEach(contact => {
+        contact.name.toLowerCase().includes(filter.toLowerCase()) &&
+        findContacts.push(contact);
+      });
+
+      const changeInput = e => {
+        setFilter(e.target.value);
       };
     
-    
-      findContacts = () => {
-        const { filter, contacts } = this.state;
-        return contacts.filter(contact =>
-          contact.name.toLowerCase().includes(filter.toLowerCase())
-        );
-      };
+     const  deleteContacts = id => {
+      setContacts(contacts.filter(contact => contact.id !== id));
+    };
 
-      changeInput = e => {
-        this.setState({ filter: e.target.value });
-      };
-    
-      deleteContacts = id => {
-        this.setState(prevState => ({
-          contacts: prevState.contacts.filter(contact => contact.id !== id),
-        }));
-      };
 
-      componentDidUpdate(prevState) {
-        this.state.contacts !== prevState.contacts &&
-          localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-      };
-
-      componentDidMount() {
-        const contacts = JSON.parse(localStorage.getItem('contacts'));
-        contacts && this.setState({ contacts: contacts});
-      }
-
-    render() {
         return (
             <div>
               <h1 className={css.phoneBoock__h} >Phonebook</h1>
-              <ContactForm onSubmit={this.formSubmit} />
+              <ContactForm contactFormSubmit={formSubmit} />
               <h2>Contacts</h2>
-              <Filter filter={this.state.filter} changeInput={this.changeInput}/>
+              <Filter filter={filter} changeInput={changeInput}/>
               <Contacts
-                contacts={this.findContacts()}
-                deleteContacts={this.deleteContacts}
+                contacts={findContacts}
+                deleteContacts={deleteContacts}
               />
             </div>
         );
       }
 
-}
+
 
 
 

@@ -1,7 +1,7 @@
 import css from '../ContactForm/ContactForm.module.css';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {setItems, setFilter } from '../../redux/contscts';
+import {setItems, setFilter, getContacts } from '../../redux/contacts';
 import { nanoid } from 'nanoid';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,10 +10,10 @@ export default function ContactForm () {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.items);
+  const contacts = useSelector(getContacts);
     
       const inputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value } = e.currentTarget;
     switch (name) {
       case 'name':
         setName(value);
@@ -25,14 +25,18 @@ export default function ContactForm () {
 
       default:
         break;
-    }
-  };
+      }
+    };
     
       const formSubmit = (e) => {
         e.preventDefault();
-      const namecontacts = { name, number, id: nanoid() };
+      const namecontacts = { id: nanoid(), name, number };
 
-      contacts.some(contact => contact.name.toLowerCase() === namecontacts.name.toLocaleLowerCase()
+      contacts.find(contact => 
+        
+        ((contact.name.toLowerCase()) === namecontacts.name.toLocaleLowerCase() 
+        || contact.number === namecontacts.number)
+
       )
       ?(toast(`${name} is already in contacts`, {
           position: 'top-right',
@@ -44,7 +48,7 @@ export default function ContactForm () {
           progress: undefined,
         })
         )
-        :dispatch(setItems(namecontacts));
+        :dispatch(setItems(namecontacts))
         
 
         setName('');

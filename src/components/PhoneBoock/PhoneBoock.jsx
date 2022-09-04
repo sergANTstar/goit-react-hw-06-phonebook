@@ -14,7 +14,7 @@ export default function  PhoneBoock () {
               <ContactForm/>
               <h2>Contacts</h2>
               <Filter/>
-              <Contacts/>
+             <Contacts/>
             </div>
         );
       }

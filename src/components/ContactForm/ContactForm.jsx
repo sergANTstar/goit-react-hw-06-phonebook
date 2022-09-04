@@ -1,10 +1,16 @@
 import css from '../ContactForm/ContactForm.module.css';
-import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {setItems, setFilter } from '../../redux/contscts';
+import { nanoid } from 'nanoid';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export function ContactForm ({contactFormSubmit}) {
+export default function ContactForm () {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts.items);
     
       const inputChange = (e) => {
         const { name, value } = e.target;
@@ -24,9 +30,27 @@ export function ContactForm ({contactFormSubmit}) {
     
       const formSubmit = (e) => {
         e.preventDefault();
-        contactFormSubmit(name, number);
+      const namecontacts = { name, number, id: nanoid() };
+
+      contacts.some(contact => contact.name.toLowerCase() === namecontacts.name.toLocaleLowerCase()
+      )
+      ?(toast(`${name} is already in contacts`, {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        })
+        )
+        :dispatch(setItems(namecontacts));
+        
+
         setName('');
         setNumber('');
+        dispatch(setFilter(''));
+
       };
     
         return(
@@ -58,7 +82,3 @@ export function ContactForm ({contactFormSubmit}) {
         );
     }
 
-
-ContactForm.propTypes = {
-  contactFormSubmit: PropTypes.func.isRequired,
-};
